@@ -9,9 +9,11 @@ using System.ComponentModel.Design;
 using System.IO;
 using System.Windows.Forms;
 using EnvDTE;
+using Microsoft.VisualStudio.Settings.Internal;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using RestSharp;
+
 
 namespace GithubGistExtension
 {
@@ -111,19 +113,19 @@ namespace GithubGistExtension
         private async void CreateGist(string fileName, string text)
         {
             var client = new RestClient("https://api.github.com");
-            var request = new RestRequest("gists", Method.POST) {RequestFormat = DataFormat.Json};
+            var request = new RestRequest("gists", Method.POST) { RequestFormat = DataFormat.Json };
             request.AddJsonBody(new JsonObject
             {
                 ["files"] =
                     new JsonObject
                     {
                         [fileName] =
-                            new JsonObject {["content"] = text}
+                            new JsonObject {["content"] = text }
                     }
             });
             var result = await client.ExecuteTaskAsync(request);
 
-            var gistUrl = ((JsonObject) SimpleJson.DeserializeObject(result.Content))["html_url"] as string;
+            var gistUrl = ((JsonObject)SimpleJson.DeserializeObject(result.Content))["html_url"] as string;
             Clipboard.SetText(gistUrl);
             ShowMessageBox("Гист создан. Ссылка в клипборде", gistUrl);
         }
