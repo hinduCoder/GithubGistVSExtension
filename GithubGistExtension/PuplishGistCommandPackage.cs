@@ -9,12 +9,17 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using GithubGistExtension.Common;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
+using Ninject;
+using Ninject.Extensions.Conventions;
 
 namespace GithubGistExtension
 {
@@ -40,8 +45,12 @@ namespace GithubGistExtension
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(PuplishGistCommandPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
+    //[ProvideToolWindow(typeof(ToolWindow1))]
+    [ProvideToolWindow(typeof(Gists))]
     public sealed class PuplishGistCommandPackage : Package
     {
+        private static StandardKernel StandardKernel { get; } = new StandardKernel(new NinjectSettings { InjectNonPublic = true }, new MainNinjectModule());
+
         /// <summary>
         /// PuplishGistCommandPackage GUID string.
         /// </summary>
@@ -56,6 +65,12 @@ namespace GithubGistExtension
             // any Visual Studio service because at this point the package object is created but
             // not sited yet inside Visual Studio environment. The place to do all the other
             // initialization is the Initialize method.
+            AppDomain.CurrentDomain.FirstChanceException += CurrentDomainOnFirstChanceException;
+        }
+
+        private void CurrentDomainOnFirstChanceException(object sender, FirstChanceExceptionEventArgs firstChanceExceptionEventArgs)
+        {
+            var exception = firstChanceExceptionEventArgs.Exception;
         }
 
         #region Package Members
@@ -66,8 +81,21 @@ namespace GithubGistExtension
         /// </summary>
         protected override void Initialize()
         {
-            PuplishGistCommand.Initialize(this);
             base.Initialize();
+            ConfigureCommands();
+            GistsCommand.Initialize(this);
+        }
+
+        private void ConfigureCommands()
+        {
+            var kernel = StandardKernel;
+            kernel.Rebind<Package>().ToConstant(this);
+            var commandService = kernel.Get<IMenuCommandService>();
+            foreach (var command in kernel.GetAll<ICommand>())
+            {
+                commandService.AddCommand(new MenuCommand((sender, e) => command.Handle(sender), 
+                    new CommandID(command.CommandSet, command.CommandId)));
+            }
         }
 
         #endregion

@@ -55,11 +55,28 @@
     <CopyVsixExtensionFiles>False</CopyVsixExtensionFiles>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Common\WebBrowser\DefaultWebBrowserProvider.cs" />
+    <Compile Include="Common\WebBrowser\VSWebBrowserProvider.cs" />
+    <Compile Include="Common\WebBrowser\WebBrowserAuthProviderBase.cs" />
+    <Compile Include="Common\WebBrowser\IWebBrowserAuthProvider.cs" />
+    <Compile Include="Common\MainNinjectModule.cs" />
+    <Compile Include="Common\GithubAutorizer.cs" />
+    <Compile Include="Common\GithubGistApi.cs" />
+    <Compile Include="Common\HttpServer.cs" />
+    <Compile Include="GistsToolWindow\Gists.cs" />
+    <Compile Include="GistsToolWindow\GistsCommand.cs" />
+    <Compile Include="GistsToolWindow\GistsControl.xaml.cs">
+      <DependentUpon>GistsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GistsToolWindow\GistsViewModel.cs" />
+    <Compile Include="ICommand.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PuplishGistCommand.cs" />
     <Compile Include="PuplishGistCommandPackage.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Key.snk" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
@@ -72,6 +89,7 @@
     <VSCTCompile Include="PuplishGistCommandPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
+    <Content Include="Resources\GistsCommand.png" />
     <Content Include="Resources\icon.png" />
     <Content Include="Resources\PuplishGistCommandPackage.ico" />
   </ItemGroup>
@@ -168,19 +186,38 @@
       <HintPath>..\packages\Microsoft.VisualStudio.Validation.14.0.50702\lib\net45\Microsoft.VisualStudio.Validation.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RestSharp.105.2.3\lib\net452\RestSharp.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ninject.Extensions.Conventions, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.Extensions.Conventions.3.2.0.0\lib\net45-full\Ninject.Extensions.Conventions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="RestSharp, Version=100.0.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharpSigned.105.2.3\lib\net452\RestSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="VSPackage.resx">
@@ -188,6 +225,12 @@
       <ManifestResourceName>VSPackage</ManifestResourceName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="GistsToolWindow\GistsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
